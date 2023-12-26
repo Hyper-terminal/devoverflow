@@ -1,11 +1,38 @@
 "use client";
 
 import HomeFilters from "@/components/home/HomeFilters";
+import QuestionCard from "@/components/home/QuestionCard";
+import NoResult from "@/components/shared/NoResult";
 import Filter from "@/components/shared/filter/Filter";
 import LocalSearchbar from "@/components/shared/search/LocalSearchbar";
 import { Button } from "@/components/ui/button";
 import { HomePageFilters } from "@/constants/filter";
 import Link from "next/link";
+
+const questions = [
+  {
+    _id: 1,
+    question: "What is the capital of France?",
+    answer: "Paris",
+    tags: [{ _id: 1, name: "Geography", color: "#FF0000" }],
+    author: "John Doe",
+    upvotes: 10,
+    views: 100,
+    answers: 2,
+    createdAt: "2023-01-01",
+  },
+  {
+    _id: 2,
+    question: "What is the capital of France?",
+    answer: "Paris",
+    tags: [{ _id: 1, name: "Geography", color: "#FF0000" }],
+    author: "John Doe",
+    upvotes: 10,
+    views: 100,
+    answers: 2,
+    createdAt: "2023-01-01",
+  },
+];
 
 export default function Home() {
   return (
@@ -19,7 +46,6 @@ export default function Home() {
 
       <div className="mt-11 flex justify-between max-sm:flex-col sm:items-center">
         <LocalSearchbar route="/" iconPosition="left" imgSrc="/assets/icons/search.svg" placeholder="Search for Question..." otherClasses="flex-1 " />
-
         <Filter
           otherClasses="min-h-[56px] sm:min-w-[170px]"
           containerClasses="flex md:hidden"
@@ -30,6 +56,33 @@ export default function Home() {
         />
       </div>
       <HomeFilters />
+
+      <div className="mt-10 flex flex-col gap-10">
+        {questions?.length === 0 ? (
+          <NoResult
+            title="There's no question to show"
+            description=" Be the first to break the silence! 🚀 Ask a Question and kickstart the discussion. our query could be the next big thing others learn from. Get
+        involved! 💡"
+            link="/ask-question"
+            linkText="Ask a Question"
+          />
+        ) : (
+          questions.map((question) => (
+            <QuestionCard
+              author={question?.author}
+              answers={question?.answers}
+              createdAt={question?.createdAt}
+              tags={question?.tags}
+              upvotes={question?.upvotes}
+              views={question?.views}
+              question={question?.question}
+              key={question?._id}
+              avatarSrc="/assets/icons/account.svg"
+              _id={question?._id}
+            />
+          ))
+        )}
+      </div>
     </>
   );
 }

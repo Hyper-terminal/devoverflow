@@ -7,6 +7,10 @@ body {
   font-family: "Inter", sans-serif;
 }
 
+.dark-gradient {
+  background: linear-gradient(232deg, rgba(23, 28, 35, 0.41) 0%, rgba(19, 22, 28, 0.7) 100%);
+}
+
 @layer utilities {
   .flex-center {
     @apply flex justify-center items-center;
@@ -18,10 +22,6 @@ body {
 
   .flex-start {
     @apply flex justify-start items-center;
-  }
-
-  .card-wrapper {
-    @apply bg-light-900 dark:dark-gradient shadow-light-100 dar;
   }
 
   .btn {
@@ -53,25 +53,12 @@ body {
   background: linear-gradient(129deg, #ff7000 0%, #e2995f 100%);
 }
 
-.dark-gradient {
-  background: linear-gradient(
-    232deg,
-    rgba(23, 28, 35, 0.41) 0%,
-    rgba(19, 22, 28, 0.7) 100%
-  );
-}
-
 .active-theme {
-  filter: invert(53%) sepia(98%) saturate(3332%) hue-rotate(0deg)
-    brightness(104%) contrast(106%) !important;
+  filter: invert(53%) sepia(98%) saturate(3332%) hue-rotate(0deg) brightness(104%) contrast(106%) !important;
 }
 
 .light-gradient {
-  background: linear-gradient(
-    132deg,
-    rgba(247, 249, 255, 0.5) 0%,
-    rgba(229, 237, 255, 0.25) 100%
-  );
+  background: linear-gradient(132deg, rgba(247, 249, 255, 0.5) 0%, rgba(229, 237, 255, 0.25) 100%);
 }
 
 .primary-text-gradient {
