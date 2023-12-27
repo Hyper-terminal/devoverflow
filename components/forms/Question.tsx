@@ -11,6 +11,7 @@ import { Input } from "../ui/input";
 import React, { useRef, useState } from "react";
 import { Badge } from "../ui/badge";
 import Image from "next/image";
+import { createQuestion } from "@/lib/actions/question.action";
 
 const type: string = "create";
 
@@ -28,10 +29,11 @@ const Question = () => {
   });
 
   // 2. Define a submit handler.
-  function onSubmit(values: z.infer<typeof QuestionSchema>) {
+  async function onSubmit(values: z.infer<typeof QuestionSchema>) {
     setIsSubmitting(true);
     try {
       // make an async call to our api
+      await createQuestion({});
       // navigate to home page
     } catch (error) {
     } finally {
@@ -101,6 +103,8 @@ const Question = () => {
               <FormControl className="mt-3.5">
                 <Editor
                   apiKey={process.env.NEXT_PUBLIC_TINY_API_KEY}
+                  onEditorChange={(content) => field.onChange(content)}
+                  onBlur={field.onBlur}
                   onInit={(evt, editor) => {
                     // @ts-ignore
                     editorRef.current = editor;
