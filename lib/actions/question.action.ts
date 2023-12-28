@@ -2,9 +2,25 @@
 
 import Question, { IQuestion } from "@/database/question.model";
 import Tag, { ITag } from "@/database/tag.model";
+import User from "@/database/user.model";
+import { CreateQuestionParams, GetQuestionsParams } from "@/lib/actions/shared.types";
 import { connectToDb } from "../mongoose";
+import { formatResultFromDB } from "../utils";
+import { revalidatePath } from "next/cache";
 
-export async function createQuestion(params: any) {
+export async function getQuestions(params: GetQuestionsParams) {
+  try {
+    connectToDb();
+    const questions = await Question.find({}).populate({ path: "tags", model: Tag }).populate({ path: "author", model: User });
+
+    return { questions: formatResultFromDB(questions) };
+  } catch (error) {
+    console.log(error);
+    return { questions: null };
+  }
+}
+
+export async function createQuestion(params: CreateQuestionParams) {
   try {
     console.log("Calling create question");
 
@@ -46,6 +62,9 @@ export async function createQuestion(params: any) {
     // Update question with tags and save
     question.tags = tagDocuments.map((tag) => tag._id);
     await question.save();
+
+    // need to revalidate the path
+    revalidatePath(params.path);
 
     return {
       success: true,

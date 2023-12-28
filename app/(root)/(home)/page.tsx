@@ -1,5 +1,3 @@
-"use client";
-
 import HomeFilters from "@/components/home/HomeFilters";
 import QuestionCard from "@/components/home/QuestionCard";
 import NoResult from "@/components/shared/NoResult";
@@ -7,34 +5,12 @@ import Filter from "@/components/shared/filter/Filter";
 import LocalSearchbar from "@/components/shared/search/LocalSearchbar";
 import { Button } from "@/components/ui/button";
 import { HomePageFilters } from "@/constants/filter";
+import { getQuestions } from "@/lib/actions/question.action";
 import Link from "next/link";
 
-const questions = [
-  {
-    _id: 1,
-    question: "What is the capital of France?",
-    answer: "Paris",
-    tags: [{ _id: 1, name: "Geography", color: "#FF0000" }],
-    author: "John Doe",
-    upvotes: 10,
-    views: 100,
-    answers: 2,
-    createdAt: "2023-01-01",
-  },
-  {
-    _id: 2,
-    question: "What is the capital of France?",
-    answer: "Paris",
-    tags: [{ _id: 1, name: "Geography", color: "#FF0000" }],
-    author: "John Doe",
-    upvotes: 10,
-    views: 100,
-    answers: 2,
-    createdAt: "2023-01-01",
-  },
-];
+export default async function Home() {
+  const { questions } = await getQuestions({});
 
-export default function Home() {
   return (
     <>
       <div className="flex w-full flex-col-reverse justify-between gap-4 sm:flex-row sm:items-center">
@@ -46,14 +22,7 @@ export default function Home() {
 
       <div className="mt-11 flex justify-between max-sm:flex-col sm:items-center">
         <LocalSearchbar route="/" iconPosition="left" imgSrc="/assets/icons/search.svg" placeholder="Search for Question..." otherClasses="flex-1 " />
-        <Filter
-          otherClasses="min-h-[56px] sm:min-w-[170px]"
-          containerClasses="flex md:hidden"
-          placeholder="Select a Filter..."
-          options={HomePageFilters}
-          onChange={() => {}}
-          value=""
-        />
+        <Filter otherClasses="min-h-[56px] sm:min-w-[170px]" containerClasses="flex md:hidden" placeholder="Select a Filter..." options={HomePageFilters} />
       </div>
       <HomeFilters />
 
@@ -67,15 +36,15 @@ export default function Home() {
             linkText="Ask a Question"
           />
         ) : (
-          questions.map((question) => (
+          questions.map((question: any) => (
             <QuestionCard
               author={question?.author}
-              answers={question?.answers}
+              answers={question?.answers?.length}
               createdAt={question?.createdAt}
               tags={question?.tags}
               upvotes={question?.upvotes}
               views={question?.views}
-              question={question?.question}
+              question={question?.title}
               key={question?._id}
               avatarSrc="/assets/icons/account.svg"
               _id={question?._id}

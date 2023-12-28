@@ -42,3 +42,7 @@ export const formatAndDivideNumber = (number: number | string): string => {
     return String(number);
   }
 };
+
+export const formatResultFromDB = (data: any): any => {
+  return JSON.parse(JSON.stringify(data));
+};
