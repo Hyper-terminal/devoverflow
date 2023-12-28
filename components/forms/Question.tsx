@@ -1,21 +1,22 @@
 "use client";
 
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { createQuestion } from "@/lib/actions/question.action";
 import { QuestionSchema } from "@/lib/validation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Editor } from "@tinymce/tinymce-react";
+import Image from "next/image";
+import React, { useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
+import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
-import React, { useRef, useState } from "react";
-import { Badge } from "../ui/badge";
-import Image from "next/image";
-import { createQuestion } from "@/lib/actions/question.action";
+import { redirect } from "next/navigation";
 
 const type: string = "create";
 
-const Question = () => {
+const Question = ({ mongoDBUserID }: { mongoDBUserID: any }) => {
   const editorRef = useRef();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -32,10 +33,21 @@ const Question = () => {
   async function onSubmit(values: z.infer<typeof QuestionSchema>) {
     setIsSubmitting(true);
     try {
+      console.log("making");
+
       // make an async call to our api
-      await createQuestion({});
+      await createQuestion({
+        title: values.title,
+        content: values.explanation,
+        tags: values.tags,
+        author: JSON.parse(mongoDBUserID),
+      });
+
+      redirect("/");
+
       // navigate to home page
     } catch (error) {
+      console.log(error);
     } finally {
       setIsSubmitting(false);
     }
@@ -198,7 +210,7 @@ const Question = () => {
             </FormItem>
           )}
         />
-        <Button disabled={isSubmitting} type="submit" className="primary-gradient w-fit !text-light-900">
+        <Button disabled={isSubmitting} type="submit" className="primary-gradient w-fit !text-light-900 disabled:bg-gray-400">
           {isSubmitting ? <>{type === "edit" ? "Editing..." : "Posting..."}</> : <>{type === "edit" ? "Edit Question" : "Ask Question"}</>}
         </Button>
       </form>

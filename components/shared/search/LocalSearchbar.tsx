@@ -39,7 +39,6 @@ const LocalSearchbar = ({ iconPosition, imgSrc, route, placeholder, otherClasses
       <Input
         type="text"
         placeholder={placeholder ?? "Search"}
-        value=""
         onChange={onChange}
         className={cn(
           `paragraph-regular no-focus placeholder background-light800_darkgradient focus-visible:ring-0 focus-visible:outline-none border-none shadow-none outline-none ring-0`,

@@ -10,7 +10,7 @@ interface QuestionCardProps {
   upvotes: string | number;
   views: string | number;
   answers: string | number;
-  createdAt: Date;
+  createdAt: Date | string;
   avatarSrc: string;
   _id: string | number;
 }
