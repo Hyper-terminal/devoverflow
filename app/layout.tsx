@@ -1,3 +1,4 @@
+/* eslint-disable camelcase */
 import type { Metadata } from "next";
 import { Inter, Space_Grotesk } from "next/font/google";
 import "./globals.css";
@@ -19,18 +20,13 @@ const spaceGrotesk = Space_Grotesk({
 
 export const metadata: Metadata = {
   title: "Dev overflow",
-  description:
-    "A community driven application for asking and answering questions about",
+  description: "A community driven application for asking and answering questions about",
   icons: {
     icon: "/public/assets/images/site-logo.svg",
   },
 };
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
       <body className={`${inter.variable} ${spaceGrotesk.variable}`}>
