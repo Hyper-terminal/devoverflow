@@ -6,7 +6,7 @@ import { QuestionSchema } from "@/lib/validation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Editor } from "@tinymce/tinymce-react";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import React, { useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
@@ -19,6 +19,7 @@ const type: string = "create";
 const Question = ({ mongoDBUserID }: { mongoDBUserID: any }) => {
   const editorRef = useRef();
   const router = useRouter();
+  const pathname = usePathname();
 
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -41,7 +42,7 @@ const Question = ({ mongoDBUserID }: { mongoDBUserID: any }) => {
         content: values.explanation,
         tags: values.tags,
         author: JSON.parse(mongoDBUserID),
-        path: router.pathname,
+        path: pathname,
       });
 
       // navigate to home page
