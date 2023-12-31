@@ -60,6 +60,8 @@ export async function POST(req: Request) {
     case "user.created": {
       const { id, email_addresses, image_url, username, first_name, last_name } = evt.data;
 
+      console.log("creating user", evt.data);
+
       // create a new user in our mongo db also
       const mongoUser = await createUser({
         clerkId: id,
@@ -74,6 +76,7 @@ export async function POST(req: Request) {
 
     case "user.updated": {
       const { id, email_addresses, image_url, username, first_name, last_name } = evt.data;
+      console.log("updating user", evt.data);
 
       // create a new user in our mongo db also
       const mongoUser = await updateUser({
@@ -93,6 +96,7 @@ export async function POST(req: Request) {
 
     case "user.deleted": {
       const { id } = evt.data;
+      console.log("deleting user", evt.data);
 
       // create a new user in our mongo db also
       const mongoUser = await deleteUser({
