@@ -1,7 +1,7 @@
 import Question from "@/database/question.model";
 import User from "@/database/user.model";
 import { connectToDb } from "../mongoose";
-import { CreateUserParams, DeleteUserParams, UpdateUserParams } from "./shared.types";
+import { CreateUserParams, DeleteUserParams, GetAllUsersParams, UpdateUserParams } from "./shared.types";
 import { revalidatePath } from "next/cache";
 import mongoose from "mongoose";
 
@@ -74,6 +74,20 @@ export async function deleteUser(userData: DeleteUserParams) {
   } catch (error) {
     await session.abortTransaction();
     session.endSession();
+    console.log(error);
+    return null;
+  }
+}
+
+export async function getAllUsers(params: GetAllUsersParams) {
+  try {
+    connectToDb();
+
+    // const { page = 1, pageSize = 10, filter, searchQuery } = params;
+
+    const users = await User.find({}).sort({ createdAt: -1 });
+    return users;
+  } catch (error) {
     console.log(error);
     return null;
   }

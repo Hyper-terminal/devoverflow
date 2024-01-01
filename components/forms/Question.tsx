@@ -37,6 +37,7 @@ const Question = ({ mongoDBUserID }: { mongoDBUserID: any }) => {
     setIsSubmitting(true);
     try {
       // make an async call to our api
+      console.log("printing");
       await createQuestion({
         title: values.title,
         content: values.explanation,
@@ -45,6 +46,7 @@ const Question = ({ mongoDBUserID }: { mongoDBUserID: any }) => {
         path: pathname,
       });
 
+      console.log("redirect");
       // navigate to home page
       router.push("/");
     } catch (error) {

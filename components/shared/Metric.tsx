@@ -14,8 +14,7 @@ interface MetricProps {
 const Metric = ({ icon, alt, title, textStyles, value, isAuthor, href }: MetricProps) => {
   const metricContent = (
     <>
-      <Image src={icon} alt={alt} width={16} height={16} className={`object-contain ${href ? "rounded-full" : ""}`} />
-
+      {icon ? <Image src={icon} alt={alt} width={16} height={16} className={`object-contain ${href ? "rounded-full" : ""}`} /> : ""}
       <p className={`flex items-center gap-1 ${textStyles}`}>
         {value} <span className={`small-regular line-clamp-1 ${isAuthor ? "max-sm:hidden  " : ""}`}> {title}</span>
       </p>

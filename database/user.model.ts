@@ -7,7 +7,7 @@ interface IUser extends Document {
   password?: string;
   bio?: string;
   joinedAt: Date;
-  avatar: string;
+  picture: string;
   location?: string;
   portfolioWebsite?: string;
   clerkId: string;
@@ -22,7 +22,7 @@ const UserSchema = new Schema<IUser>({
   password: { type: String },
   bio: { type: String },
   joinedAt: { type: Date, default: Date.now },
-  avatar: { type: String },
+  picture: { type: String },
   location: { type: String },
   portfolioWebsite: { type: String },
   clerkId: { type: String, required: true },

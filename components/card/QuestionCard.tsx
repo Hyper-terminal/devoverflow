@@ -28,7 +28,7 @@ const QuestionCard = ({ _id, question, tags, author, upvotes, views, answers, cr
         <div className="flex flex-wrap items-center justify-between">
           <Metric
             href={`/user/${author?._id}`}
-            icon="/assets/icons/avatar.svg"
+            icon={author?.picture}
             alt="avatar"
             value={`${author?.name} - `}
             title={getTimeStamp(createdAt)}

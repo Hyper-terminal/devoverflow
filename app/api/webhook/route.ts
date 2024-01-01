@@ -68,7 +68,7 @@ export async function POST(req: Request) {
         picture: image_url,
         name: `${first_name} ${last_name ? ` ${last_name}` : last_name}`,
         email: email_addresses[0].email_address,
-        username: username as string,
+        username: (username as string) || first_name,
       });
 
       return NextResponse.json({ message: "OK", user: mongoUser });
@@ -85,7 +85,7 @@ export async function POST(req: Request) {
           picture: image_url,
           name: `${first_name} ${last_name ? ` ${last_name}` : last_name}`,
           email: email_addresses[0].email_address,
-          username: username as string,
+          username: (username as string) || first_name,
         },
         clerkId: id,
         path: `/profile/${id}`,
