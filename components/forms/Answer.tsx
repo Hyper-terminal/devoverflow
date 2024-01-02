@@ -1,20 +1,22 @@
 "use client";
 
+import { Form, FormControl, FormField, FormItem, FormMessage } from "@/components/ui/form";
 import useTheme from "@/context/ThemeProvider";
+import { createAnswer } from "@/lib/actions/answer.action";
 import { AnswerSchema } from "@/lib/validation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Editor } from "@tinymce/tinymce-react";
-import { useRouter } from "next/navigation";
-import { Form, FormControl, FormField, FormItem, FormMessage } from "@/components/ui/form";
 import Image from "next/image";
+import { usePathname } from "next/navigation";
 import { useRef, useState } from "react";
+import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { Button } from "../ui/button";
-import { useForm } from "react-hook-form";
 
-const Answer = () => {
+const Answer = ({ questionId, mongoDbUserId }: { questionId: string; mongoDbUserId: any }) => {
   const editorRef = useRef(null);
-  const router = useRouter();
+  const pathname = usePathname();
+
   const { mode } = useTheme();
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -32,8 +34,12 @@ const Answer = () => {
     try {
       // make an async call to our api
 
-      // navigate to home page
-      router.push("/");
+      await createAnswer({
+        path: pathname,
+        content: values.answer,
+        author: JSON.parse(mongoDbUserId),
+        question: questionId,
+      });
     } catch (error) {
       console.log(error);
     } finally {

@@ -4,9 +4,10 @@ import Question, { IQuestion } from "@/database/question.model";
 import Tag, { ITag } from "@/database/tag.model";
 import User from "@/database/user.model";
 import { CreateQuestionParams, GetQuestionByIdParams, GetQuestionsParams } from "@/lib/actions/shared.types";
+import { revalidatePath } from "next/cache";
 import { connectToDb } from "../mongoose";
 import { formatResultFromDB } from "../utils";
-import { revalidatePath } from "next/cache";
+import Answer from "@/database/answer.model";
 
 export async function getQuestions(params: GetQuestionsParams) {
   try {
@@ -25,8 +26,6 @@ export async function getQuestions(params: GetQuestionsParams) {
 
 export async function createQuestion(params: CreateQuestionParams) {
   try {
-    console.log("Calling create question");
-
     // Validate input parameters
     if (!params || !params.title || !params.content || !params.tags || !params.author) {
       throw new Error("Invalid input parameters");
@@ -94,7 +93,13 @@ export async function getQuestionById(params: GetQuestionByIdParams) {
         model: Tag,
         select: "_id name",
       })
-      .populate({ path: "author", model: User, select: "_id name picture clerkId" });
+      .populate({ path: "author", model: User, select: "_id name picture clerkId" })
+      .populate({
+        path: "answers",
+        model: Answer,
+        select: "_id content author createdOn",
+        populate: { path: "author", model: User, select: "_id name picture clerkId" },
+      });
 
     return question;
   } catch (error) {

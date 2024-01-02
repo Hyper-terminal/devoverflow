@@ -3,12 +3,29 @@ import Metric from "@/components/shared/Metric";
 import ParseHtml from "@/components/shared/ParseHtml";
 import RenderTag from "@/components/shared/RenderTag";
 import { getQuestionById } from "@/lib/actions/question.action";
+import { getUserById } from "@/lib/actions/user.action";
 import { formatAndDivideNumber, getTimeStamp } from "@/lib/utils";
+import { auth } from "@clerk/nextjs";
 import Image from "next/image";
 import Link from "next/link";
+import { redirect } from "next/navigation";
+import { Fragment } from "react";
 
 export default async function Page({ params }: { params: any }) {
+  const { userId } = auth();
+
+  // find user first
+  const mongoDbUser = await getUserById({ userId });
+
+  if (!mongoDbUser) {
+    redirect("/sign-in");
+  }
+
   const questionDetails = await getQuestionById({ questionId: params.id });
+
+  if (!questionDetails) {
+    redirect("/404");
+  }
 
   return (
     <>
@@ -56,7 +73,39 @@ export default async function Page({ params }: { params: any }) {
         ))}
       </div>
 
-      <Answer />
+      <Answer questionId={questionDetails._id} mongoDbUserId={JSON.stringify(mongoDbUser._id)} />
+
+      {questionDetails?.answers?.map((answer: any) => (
+        <Fragment key={answer._id}>
+          <div className="flex w-full flex-col-reverse items-center justify-between gap-5 sm:flex-row sm:items-center sm:gap-2">
+            <Link className="flex w-full items-center justify-start gap-4" href={`/profile/${answer?.author?._id}`}>
+              <Image className="rounded-full" src={answer?.author?.picture} alt="" width={16} height={16} />
+              <p className="paragraph-semibold text-dark300_light700">{answer?.author?.name}</p>
+            </Link>
+
+            <div className="flex justify-end">Voting</div>
+          </div>
+
+          <div className="mb-8 mt-5 flex flex-wrap gap-4">
+            <Metric
+              icon="/assets/icons/clock.svg"
+              alt="clock icon"
+              value={` asked ${getTimeStamp(answer?.createdAt)}`}
+              title=" Asked"
+              textStyles="small-medium text-dark400_light800"
+            />
+            <Metric
+              icon="/assets/icons/eye.svg"
+              alt="views"
+              value={formatAndDivideNumber(answer.views)}
+              title=" Views"
+              textStyles="small-medium text-dark400_light800"
+            />
+          </div>
+
+          <ParseHtml data={answer.content} />
+        </Fragment>
+      ))}
     </>
   );
 }
