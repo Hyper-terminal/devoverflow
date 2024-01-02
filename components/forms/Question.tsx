@@ -13,6 +13,7 @@ import * as z from "zod";
 import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
+import useTheme from "@/context/ThemeProvider";
 
 const type: string = "create";
 
@@ -20,6 +21,7 @@ const Question = ({ mongoDBUserID }: { mongoDBUserID: any }) => {
   const editorRef = useRef();
   const router = useRouter();
   const pathname = usePathname();
+  const { mode } = useTheme();
 
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -37,7 +39,6 @@ const Question = ({ mongoDBUserID }: { mongoDBUserID: any }) => {
     setIsSubmitting(true);
     try {
       // make an async call to our api
-      console.log("printing");
       await createQuestion({
         title: values.title,
         content: values.explanation,
@@ -46,7 +47,6 @@ const Question = ({ mongoDBUserID }: { mongoDBUserID: any }) => {
         path: pathname,
       });
 
-      console.log("redirect");
       // navigate to home page
       router.push("/");
     } catch (error) {
@@ -157,6 +157,8 @@ const Question = ({ mongoDBUserID }: { mongoDBUserID: any }) => {
                       "alignright alignjustify | bullist numlist outdent indent | " +
                       "removeformat | help",
                     content_style: "body { font-family:Inter; font-size:16px }",
+                    skin: mode === "dark" ? "oxide-dark" : "oxide",
+                    content_css: mode === "dark" ? "dark" : "light",
                   }}
                 />
               </FormControl>

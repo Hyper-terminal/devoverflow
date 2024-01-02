@@ -3,7 +3,7 @@
 import Question, { IQuestion } from "@/database/question.model";
 import Tag, { ITag } from "@/database/tag.model";
 import User from "@/database/user.model";
-import { CreateQuestionParams, GetQuestionsParams } from "@/lib/actions/shared.types";
+import { CreateQuestionParams, GetQuestionByIdParams, GetQuestionsParams } from "@/lib/actions/shared.types";
 import { connectToDb } from "../mongoose";
 import { formatResultFromDB } from "../utils";
 import { revalidatePath } from "next/cache";
@@ -11,7 +11,10 @@ import { revalidatePath } from "next/cache";
 export async function getQuestions(params: GetQuestionsParams) {
   try {
     connectToDb();
-    const questions = await Question.find({}).populate({ path: "tags", model: Tag }).populate({ path: "author", model: User });
+    const questions = await Question.find({}).populate({ path: "tags", model: Tag }).populate({
+      path: "author",
+      model: User,
+    });
 
     return { questions: formatResultFromDB(questions) };
   } catch (error) {
@@ -76,5 +79,26 @@ export async function createQuestion(params: CreateQuestionParams) {
     return {
       error: "Internal server error",
     };
+  }
+}
+
+export async function getQuestionById(params: GetQuestionByIdParams) {
+  try {
+    await connectToDb();
+
+    const { questionId } = params;
+
+    const question = await Question.findById(questionId)
+      .populate({
+        path: "tags",
+        model: Tag,
+        select: "_id name",
+      })
+      .populate({ path: "author", model: User, select: "_id name picture clerkId" });
+
+    return question;
+  } catch (error) {
+    console.log(error);
+    throw error;
   }
 }
