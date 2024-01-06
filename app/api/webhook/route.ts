@@ -50,17 +50,11 @@ export async function POST(req: Request) {
   }
 
   // Get the ID and type
-  const { id } = evt.data;
   const eventType = evt.type;
-
-  console.log(`Webhook with and ID of ${id} and type of ${eventType}`);
-  console.log("Webhook body:", body);
 
   switch (eventType) {
     case "user.created": {
       const { id, email_addresses, image_url, username, first_name, last_name } = evt.data;
-
-      console.log("creating user", evt.data);
 
       // create a new user in our mongo db also
       const mongoUser = await createUser({
@@ -76,7 +70,6 @@ export async function POST(req: Request) {
 
     case "user.updated": {
       const { id, email_addresses, image_url, username, first_name, last_name } = evt.data;
-      console.log("updating user", evt.data);
 
       // create a new user in our mongo db also
       const mongoUser = await updateUser({
@@ -96,7 +89,6 @@ export async function POST(req: Request) {
 
     case "user.deleted": {
       const { id } = evt.data;
-      console.log("deleting user", evt.data);
 
       // create a new user in our mongo db also
       const mongoUser = await deleteUser({

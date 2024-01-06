@@ -1,15 +1,15 @@
 "use server";
 
+import Answer from "@/database/answer.model";
 import Question, { IQuestion } from "@/database/question.model";
 import Tag, { ITag } from "@/database/tag.model";
 import User from "@/database/user.model";
-import { CreateQuestionParams, GetQuestionByIdParams, GetQuestionsParams } from "@/lib/actions/shared.types";
+import { CreateQuestionParams, GetQuestionByIdParams, GetQuestionsParams, QuestionVoteParams } from "@/lib/actions/shared.types";
 import { revalidatePath } from "next/cache";
 import { connectToDb } from "../mongoose";
 import { formatResultFromDB } from "../utils";
-import Answer from "@/database/answer.model";
 
-export async function getQuestions(params: GetQuestionsParams) {
+export async function getQuestions(params: GetQuestionsParams): Promise<{ questions: any }> {
   try {
     connectToDb();
     const questions = await Question.find({}).populate({ path: "tags", model: Tag }).populate({
@@ -93,15 +93,105 @@ export async function getQuestionById(params: GetQuestionByIdParams) {
         model: Tag,
         select: "_id name",
       })
-      .populate({ path: "author", model: User, select: "_id name picture clerkId" })
+      .populate({
+        path: "author",
+        model: User,
+        select: "_id name picture clerkId",
+      })
       .populate({
         path: "answers",
         model: Answer,
-        select: "_id content author createdOn",
-        populate: { path: "author", model: User, select: "_id name picture clerkId" },
+        select: "_id content author createdOn upvotes downvotes",
+        populate: {
+          path: "author",
+          model: User,
+          select: "_id name picture clerkId",
+        },
       });
 
     return question;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+}
+
+/**
+ * Upvotes or removes upvote from a question based on the provided parameters.
+ * @param QuestionVote - The parameters for upvoting a question.
+ * @returns {Promise<void>} - A promise that resolves when the upvote is successfully processed.
+ * @throws {Error} - If the question is not found or an error occurs during the upvote process.
+ */
+
+export async function upvoteQuestion(QuestionVote: QuestionVoteParams): Promise<void> {
+  try {
+    await connectToDb();
+
+    const { path, hasdownVoted, hasupVoted, userId, questionId } = QuestionVote;
+
+    let updateQuery = {};
+
+    if (hasupVoted) {
+      updateQuery = { $pull: { upvotes: userId } };
+    } else if (hasdownVoted) {
+      updateQuery = {
+        $pull: { downvotes: userId },
+        $push: { upvotes: userId },
+      };
+    } else {
+      updateQuery = { $addToSet: { upvotes: userId } };
+    }
+
+    const question = await Question.findByIdAndUpdate(questionId, updateQuery, {
+      new: true,
+    });
+
+    if (!question) {
+      throw new Error("Question not found");
+    }
+
+    revalidatePath(path);
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+}
+
+/**
+ * Downvotes a question based on the provided QuestionVoteParams.
+ * @param QuestionVote - The parameters for downvoting a question.
+ * @returns {Promise<void>} - A promise that resolves when the question is successfully downvoted.
+ * @throws {Error} - If the question is not found or an error occurs during the downvoting process.
+ */
+
+export async function downvoteQuestion(QuestionVote: QuestionVoteParams) {
+  try {
+    await connectToDb();
+
+    const { path, hasdownVoted, hasupVoted, userId, questionId } = QuestionVote;
+
+    let updateQuery = {};
+
+    if (hasdownVoted) {
+      updateQuery = { $pull: { downvotes: userId } };
+    } else if (hasupVoted) {
+      updateQuery = {
+        $pull: { upvotes: userId },
+        $push: { downvotes: userId },
+      };
+    } else {
+      updateQuery = { $addToSet: { downvotes: userId } };
+    }
+
+    const question = await Question.findByIdAndUpdate(questionId, updateQuery, {
+      new: true,
+    });
+
+    if (!question) {
+      throw new Error("Question not found");
+    }
+
+    revalidatePath(path);
   } catch (error) {
     console.log(error);
     throw error;

@@ -2,9 +2,10 @@ import Answer from "@/components/forms/Answer";
 import Metric from "@/components/shared/Metric";
 import ParseHtml from "@/components/shared/ParseHtml";
 import RenderTag from "@/components/shared/RenderTag";
+import Votes from "@/components/shared/Votes";
 import { getQuestionById } from "@/lib/actions/question.action";
 import { getUserById } from "@/lib/actions/user.action";
-import { formatAndDivideNumber, getTimeStamp } from "@/lib/utils";
+import { formatAndDivideNumber, formatResultFromDB, getTimeStamp } from "@/lib/utils";
 import { auth } from "@clerk/nextjs";
 import Image from "next/image";
 import Link from "next/link";
@@ -36,7 +37,18 @@ export default async function Page({ params }: { params: any }) {
             <p className="paragraph-semibold text-dark300_light700">{questionDetails?.author?.name}</p>
           </Link>
 
-          <div className="flex justify-end">Voting</div>
+          <div className="flex justify-end">
+            <Votes
+              type="question"
+              itemId={formatResultFromDB(questionDetails._id)}
+              userId={formatResultFromDB(mongoDbUser._id)}
+              upvotes={questionDetails.upvotes.length}
+              downvotes={questionDetails.downvotes.length}
+              hasSaved={questionDetails.savedBy?.includes(mongoDbUser._id)}
+              hasupvoted={questionDetails.upvotes?.includes(mongoDbUser._id)}
+              hasdownvoted={questionDetails.downvotes?.includes(mongoDbUser._id)}
+            />
+          </div>
         </div>
         <h2 className="h2-semibold text-dark200_light900 mt-3 w-full text-left">{questionDetails.title}</h2>
       </div>
@@ -75,37 +87,50 @@ export default async function Page({ params }: { params: any }) {
 
       <Answer questionId={questionDetails._id} mongoDbUserId={JSON.stringify(mongoDbUser._id)} />
 
-      {questionDetails?.answers?.map((answer: any) => (
-        <Fragment key={answer._id}>
-          <div className="flex w-full flex-col-reverse items-center justify-between gap-5 sm:flex-row sm:items-center sm:gap-2">
-            <Link className="flex w-full items-center justify-start gap-4" href={`/profile/${answer?.author?._id}`}>
-              <Image className="rounded-full" src={answer?.author?.picture} alt="" width={16} height={16} />
-              <p className="paragraph-semibold text-dark300_light700">{answer?.author?.name}</p>
-            </Link>
+      <section className="my-10 ">
+        {questionDetails?.answers?.map((answer: any) => (
+          <Fragment key={answer._id}>
+            <div className="flex w-full flex-col-reverse items-center justify-between gap-5 sm:flex-row sm:items-center sm:gap-2">
+              <Link className="flex w-full items-center justify-start gap-4" href={`/profile/${answer?.author?._id}`}>
+                <Image className="rounded-full" src={answer?.author?.picture} alt="" width={16} height={16} />
+                <p className="paragraph-semibold text-dark300_light700">{answer?.author?.name}</p>
+              </Link>
 
-            <div className="flex justify-end">Voting</div>
-          </div>
+              <div className="flex justify-end">
+                <Votes
+                  type="answer"
+                  itemId={formatResultFromDB(answer._id)}
+                  userId={formatResultFromDB(mongoDbUser._id)}
+                  upvotes={answer?.upvotes?.length || 0}
+                  downvotes={answer?.downvotes?.length || 0}
+                  hasSaved={answer.savedBy?.includes(mongoDbUser._id)}
+                  hasupvoted={answer.upvotes?.includes(mongoDbUser._id)}
+                  hasdownvoted={answer.downvotes?.includes(mongoDbUser._id)}
+                />
+              </div>
+            </div>
 
-          <div className="mb-8 mt-5 flex flex-wrap gap-4">
-            <Metric
-              icon="/assets/icons/clock.svg"
-              alt="clock icon"
-              value={` asked ${getTimeStamp(answer?.createdAt)}`}
-              title=" Asked"
-              textStyles="small-medium text-dark400_light800"
-            />
-            <Metric
-              icon="/assets/icons/eye.svg"
-              alt="views"
-              value={formatAndDivideNumber(answer.views)}
-              title=" Views"
-              textStyles="small-medium text-dark400_light800"
-            />
-          </div>
+            <div className="mb-8 mt-5 flex flex-wrap gap-4">
+              <Metric
+                icon="/assets/icons/clock.svg"
+                alt="clock icon"
+                value={` replied ${getTimeStamp(answer?.createdOn)}`}
+                title=""
+                textStyles="small-medium text-dark400_light800"
+              />
+              <Metric
+                icon="/assets/icons/eye.svg"
+                alt="views"
+                value={formatAndDivideNumber(answer.views)}
+                title=" Views"
+                textStyles="small-medium text-dark400_light800"
+              />
+            </div>
 
-          <ParseHtml data={answer.content} />
-        </Fragment>
-      ))}
+            <ParseHtml data={answer.content} />
+          </Fragment>
+        ))}
+      </section>
     </>
   );
 }
