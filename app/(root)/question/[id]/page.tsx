@@ -44,7 +44,7 @@ export default async function Page({ params }: { params: any }) {
               userId={formatResultFromDB(mongoDbUser._id)}
               upvotes={questionDetails.upvotes.length}
               downvotes={questionDetails.downvotes.length}
-              hasSaved={questionDetails.savedBy?.includes(mongoDbUser._id)}
+              hasSaved={mongoDbUser?.savedQuestions?.includes(questionDetails?._id)}
               hasupvoted={questionDetails.upvotes?.includes(mongoDbUser._id)}
               hasdownvoted={questionDetails.downvotes?.includes(mongoDbUser._id)}
             />

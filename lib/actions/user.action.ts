@@ -1,15 +1,17 @@
+"use server";
+
 import Question from "@/database/question.model";
 import User from "@/database/user.model";
-import { connectToDb } from "../mongoose";
-import { CreateUserParams, DeleteUserParams, GetAllUsersParams, UpdateUserParams } from "./shared.types";
-import { revalidatePath } from "next/cache";
 import mongoose from "mongoose";
+import { revalidatePath } from "next/cache";
+import { connectToDb } from "../mongoose";
+import { CreateUserParams, DeleteUserParams, GetAllUsersParams, GetSavedQuestionsParams, ToggleSaveQuestionParams, UpdateUserParams } from "./shared.types";
 
 export async function getUserById(params: any) {
   try {
     const userId = params?.userId;
 
-    connectToDb();
+    await connectToDb();
 
     const user = await User.findOne({ clerkId: userId });
 
@@ -23,7 +25,7 @@ export async function getUserById(params: any) {
 export async function createUser(userData: CreateUserParams) {
   try {
     connectToDb();
-    const user = new User(userData);
+    const user = new User(userData, { new: true });
     await user.save();
     return user;
   } catch (error) {
@@ -81,7 +83,7 @@ export async function deleteUser(userData: DeleteUserParams) {
 
 export async function getAllUsers(params: GetAllUsersParams) {
   try {
-    connectToDb();
+    await connectToDb();
 
     // const { page = 1, pageSize = 10, filter, searchQuery } = params;
 
@@ -90,5 +92,65 @@ export async function getAllUsers(params: GetAllUsersParams) {
   } catch (error) {
     console.log(error);
     return null;
+  }
+}
+
+export async function toggleSaveQuestion(params: ToggleSaveQuestionParams) {
+  try {
+    await connectToDb();
+
+    const { questionId, userId, path } = params;
+
+    const user = await User.findById(userId);
+
+    if (!user) {
+      throw new Error("user not found");
+    }
+
+    const savedQuestions = user?.savedQuestions;
+
+    const questionIndex = savedQuestions?.indexOf(questionId);
+
+    let updateQuery = {};
+
+    if (questionIndex !== -1) {
+      updateQuery = { $pull: { savedQuestions: questionId } };
+    } else {
+      updateQuery = { $push: { savedQuestions: questionId } };
+    }
+
+    const updatedUser = await User.findByIdAndUpdate(userId, updateQuery, { new: true });
+
+    revalidatePath(path);
+
+    return updatedUser;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+}
+
+export async function getSavedQuestions(params: GetSavedQuestionsParams) {
+  try {
+    await connectToDb();
+
+    const { clerkId } = params;
+
+    const user = User.findOne({ clerkId }).populate({
+      path: "savedQuestions",
+      match: {},
+      options: {
+        sort: { createdAt: -1 },
+      },
+      populate: [
+        { path: "author", select: "name clerkId picture _id" },
+        { path: "tags", select: "name _id" },
+      ],
+    });
+
+    return user;
+  } catch (error) {
+    console.log(error);
+    throw error;
   }
 }

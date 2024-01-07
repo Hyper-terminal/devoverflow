@@ -14,8 +14,9 @@
  * @returns The rendered Votes component.
  */
 
+import { downvoteAnswer, upvoteAnswer } from "@/lib/actions/answer.action";
 import { downvoteQuestion, upvoteQuestion } from "@/lib/actions/question.action";
-import { upvoteAnswer, downvoteAnswer } from "@/lib/actions/answer.action";
+import { toggleSaveQuestion } from "@/lib/actions/user.action";
 import { formatAndDivideNumber } from "@/lib/utils";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
@@ -76,6 +77,18 @@ const Votes = ({ type, itemId, userId, upvotes, downvotes, hasSaved, hasdownvote
     }
   }
 
+  async function handleSave() {
+    try {
+      if (!userId) return console.log("not logged in");
+
+      if (type === "question") {
+        await toggleSaveQuestion({ questionId: itemId, userId, path: pathname });
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
   return (
     <div className="flex gap-5">
       <div className="flex-center gap-2.5">
@@ -110,7 +123,14 @@ const Votes = ({ type, itemId, userId, upvotes, downvotes, hasSaved, hasdownvote
           </div>
         </div>
       </div>
-      <Image className="cursor-pointer" src={hasSaved ? "/assets/icons/star-filled.svg" : "/assets/icons/star-red.svg"} alt="star" width={18} height={18} />
+      <Image
+        className="cursor-pointer"
+        onClick={handleSave}
+        src={hasSaved ? "/assets/icons/star-filled.svg" : "/assets/icons/star-red.svg"}
+        alt="star"
+        width={18}
+        height={18}
+      />
     </div>
   );
 };

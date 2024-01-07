@@ -12,11 +12,12 @@ interface IUser extends Document {
   portfolioWebsite?: string;
   clerkId: string;
   reputation?: number;
-  saved?: Schema.Types.ObjectId[];
+  savedQuestions?: Schema.Types.ObjectId[];
 }
 
 const UserSchema = new Schema<IUser>({
   username: { type: String, required: true, unique: true },
+  savedQuestions: [{ type: Schema.Types.ObjectId, ref: "Question", default: [] }],
   name: { type: String, required: true },
   email: { type: String, required: true, unique: true },
   password: { type: String },
@@ -27,7 +28,6 @@ const UserSchema = new Schema<IUser>({
   portfolioWebsite: { type: String },
   clerkId: { type: String, required: true },
   reputation: { type: Number, default: 0 },
-  saved: [{ type: Schema.Types.ObjectId, ref: "Question" }],
 });
 
 const User = models?.User || model<IUser>("User", UserSchema);

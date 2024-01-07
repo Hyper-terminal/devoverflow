@@ -11,7 +11,7 @@ import { formatResultFromDB } from "../utils";
 
 export async function getQuestions(params: GetQuestionsParams): Promise<{ questions: any }> {
   try {
-    connectToDb();
+    await connectToDb();
     const questions = await Question.find({}).populate({ path: "tags", model: Tag }).populate({
       path: "author",
       model: User,
@@ -197,3 +197,10 @@ export async function downvoteQuestion(QuestionVote: QuestionVoteParams) {
     throw error;
   }
 }
+
+/**
+ * Saves a question by adding the user ID to the 'savedBy' array in the question document.
+ * @param params - The parameters for saving the question.
+ * @returns The updated question document.
+ * @throws If the question is not found or an error occurs during the process.
+ */
