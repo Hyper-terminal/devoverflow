@@ -15,11 +15,13 @@
  */
 
 import { downvoteAnswer, upvoteAnswer } from "@/lib/actions/answer.action";
+import { viewQuestion } from "@/lib/actions/interaction.action";
 import { downvoteQuestion, upvoteQuestion } from "@/lib/actions/question.action";
 import { toggleSaveQuestion } from "@/lib/actions/user.action";
 import { formatAndDivideNumber } from "@/lib/utils";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
+import { useEffect } from "react";
 
 interface VotesProps {
   type: "question" | "answer";
@@ -88,6 +90,10 @@ const Votes = ({ type, itemId, userId, upvotes, downvotes, hasSaved, hasdownvote
       console.log(error);
     }
   }
+
+  useEffect(() => {
+    viewQuestion({ questionId: itemId, userId });
+  }, [itemId, userId, pathname]);
 
   return (
     <div className="flex gap-5">

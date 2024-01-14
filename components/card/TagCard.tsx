@@ -14,7 +14,7 @@ const TagCard = ({ tag }: Props) => {
       <article className="background-light900_dark200 light-border flex w-full flex-col items-center justify-center rounded-2xl border p-8">
         <div className="mt-4 text-center">
           <h3 className="h3-bold text-dark200_light900 line-clamp-1">{tag.name}</h3>
-          <p>
+          <p className="text-dark300_light700">
             <span className="primary-text-gradient mr-2.5 font-bold">{tag?.questions?.length}+</span> Questions
           </p>
         </div>

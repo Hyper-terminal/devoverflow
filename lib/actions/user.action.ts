@@ -2,7 +2,7 @@
 
 import Question from "@/database/question.model";
 import User from "@/database/user.model";
-import mongoose from "mongoose";
+import mongoose, { FilterQuery } from "mongoose";
 import { revalidatePath } from "next/cache";
 import { connectToDb } from "../mongoose";
 import { CreateUserParams, DeleteUserParams, GetAllUsersParams, GetSavedQuestionsParams, ToggleSaveQuestionParams, UpdateUserParams } from "./shared.types";
@@ -134,11 +134,13 @@ export async function getSavedQuestions(params: GetSavedQuestionsParams) {
   try {
     await connectToDb();
 
-    const { clerkId } = params;
+    const { clerkId, searchQuery } = params;
+
+    const query: FilterQuery<typeof Question> = searchQuery ? { $title: { $regex: new RegExp(searchQuery, "i") } } : {};
 
     const user = User.findOne({ clerkId }).populate({
       path: "savedQuestions",
-      match: {},
+      match: query,
       options: {
         sort: { createdAt: -1 },
       },
