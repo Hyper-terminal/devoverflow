@@ -5,7 +5,17 @@ import User from "@/database/user.model";
 import mongoose, { FilterQuery } from "mongoose";
 import { revalidatePath } from "next/cache";
 import { connectToDb } from "../mongoose";
-import { CreateUserParams, DeleteUserParams, GetAllUsersParams, GetSavedQuestionsParams, ToggleSaveQuestionParams, UpdateUserParams } from "./shared.types";
+import {
+  CreateUserParams,
+  DeleteUserParams,
+  GetAllUsersParams,
+  GetSavedQuestionsParams,
+  GetUserByIdParams,
+  ToggleSaveQuestionParams,
+  UpdateUserParams,
+} from "./shared.types";
+import Answer from "@/database/answer.model";
+import Tag from "@/database/tag.model";
 
 export async function getUserById(params: any) {
   try {
@@ -154,5 +164,79 @@ export async function getSavedQuestions(params: GetSavedQuestionsParams) {
   } catch (error) {
     console.log(error);
     throw error;
+  }
+}
+
+export async function getUserInfoById(params: GetUserByIdParams) {
+  try {
+    const userId = params?.userId;
+
+    await connectToDb();
+
+    const user = await User.findOne({ clerkId: userId });
+
+    // find answers and questions by the user
+    const totalUserAnswers = await Answer.countDocuments({ author: user?._id });
+    const totalUserQuestions = await Question.countDocuments({ author: user?._id });
+
+    if (!user) {
+      throw new Error("user not found");
+      return null;
+    }
+
+    user.totalUserAnswers = totalUserAnswers;
+    user.totalUserQuestions = totalUserQuestions;
+
+    return user;
+
+    return user;
+  } catch (error) {
+    console.log(error);
+    return null;
+  }
+}
+
+export async function getAllQuestionByUser(params: any) {
+  try {
+    const userId = params?.userId;
+
+    await connectToDb();
+
+    const user = await User.findOne({ clerkId: userId });
+
+    if (!user) {
+      throw new Error("user not found");
+    }
+
+    const questions = await Question.find({ author: user?._id })
+      .populate({ path: "author", select: "name clerkId picture _id", model: User })
+      .populate({ path: "tags", select: "name _id", model: Tag })
+      .sort({ createdAt: -1 });
+
+    return questions;
+  } catch (error) {
+    console.log(error);
+    return null;
+  }
+}
+
+export async function getAllAnswersByUser(params: any) {
+  try {
+    const userId = params?.userId;
+
+    await connectToDb();
+
+    const user = await User.findOne({ clerkId: userId });
+
+    if (!user) {
+      throw new Error("user not found");
+    }
+
+    const questions = await Answer.find({ author: user?._id }).sort({ createdAt: -1 });
+
+    return questions;
+  } catch (error) {
+    console.log(error);
+    return null;
   }
 }

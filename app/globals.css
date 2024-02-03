@@ -41,7 +41,21 @@ body {
   }
 
   .tab {
-    @apply min-h-full dark:bg-dark-400 bg-light-800 text-light-5;
+    @apply min-h-full dark:bg-dark-400 bg-light-800 text-light-500;
+    transition: transform 0.3s ease-in-out;
+  }
+
+  .tab:hover {
+    @apply dark:bg-dark-500 bg-light-900;
+  }
+
+  .tab:focus {
+    @apply outline-none;
+  }
+
+  .tab.active {
+    @apply dark:bg-dark-500 bg-light-900;
+    transform: translateX(10px); /* Adjust the value as per your requirement */
   }
 
   .no-focus {
