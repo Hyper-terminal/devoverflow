@@ -181,13 +181,10 @@ export async function getUserInfoById(params: GetUserByIdParams) {
 
     if (!user) {
       throw new Error("user not found");
-      return null;
     }
 
     user.totalUserAnswers = totalUserAnswers;
     user.totalUserQuestions = totalUserQuestions;
-
-    return user;
 
     return user;
   } catch (error) {
