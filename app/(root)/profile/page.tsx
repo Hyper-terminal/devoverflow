@@ -1,7 +1,6 @@
 import QuestionCard from "@/components/card/QuestionCard";
 import Metric from "@/components/shared/Metric";
 import StatsCard from "@/components/shared/StatsCard";
-import { IQuestion } from "@/database/question.model";
 import { getAllAnswersByUser, getAllQuestionByUser, getUserInfoById } from "@/lib/actions/user.action";
 import { auth } from "@clerk/nextjs";
 import Image from "next/image";
