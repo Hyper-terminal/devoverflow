@@ -4,7 +4,7 @@ import Answer from "@/database/answer.model";
 import Question, { IQuestion } from "@/database/question.model";
 import Tag, { ITag } from "@/database/tag.model";
 import User from "@/database/user.model";
-import { CreateQuestionParams, GetQuestionByIdParams, GetQuestionsParams, QuestionVoteParams } from "@/lib/actions/shared.types";
+import { CreateQuestionParams, EditQuestionParams, GetQuestionByIdParams, GetQuestionsParams, QuestionVoteParams } from "@/lib/actions/shared.types";
 import { revalidatePath } from "next/cache";
 import { connectToDb } from "../mongoose";
 import { formatResultFromDB } from "../utils";
@@ -56,7 +56,7 @@ export async function createQuestion(params: CreateQuestionParams) {
           $setOnInsert: { name: tagName },
           $push: { questions: question._id },
         },
-        { upsert: true, new: true },
+        { upsert: true, new: true }
       );
       tagDocuments.push(existingTag);
     }
@@ -198,9 +198,49 @@ export async function downvoteQuestion(QuestionVote: QuestionVoteParams) {
   }
 }
 
-/**
- * Saves a question by adding the user ID to the 'savedBy' array in the question document.
- * @param params - The parameters for saving the question.
- * @returns The updated question document.
- * @throws If the question is not found or an error occurs during the process.
- */
+export async function updateQuestion(params: EditQuestionParams) {
+  try {
+    await connectToDb();
+
+    const { questionId, title, content, tags, authorID } = params;
+
+    // if the authorID is not the same as the author of the question, throw an error
+
+    const question = await Question.findById(questionId);
+
+    if (!question) {
+      throw new Error("Question not found");
+    }
+
+    if (question.author.toString() !== authorID.toString()) {
+      throw new Error("You are not authorized to edit this question");
+    }
+
+    const tagDocuments: ITag[] = [];
+
+    // Process tags
+    for (const tagName of tags) {
+      const existingTag = await Tag.findOneAndUpdate(
+        { name: { $regex: new RegExp(`^${tagName}$`, "i") } },
+        {
+          $setOnInsert: { name: tagName },
+          $push: { questions: question._id },
+        },
+        { upsert: true, new: true }
+      );
+      tagDocuments.push(existingTag);
+    }
+
+    // Update question with tags and save
+
+    question.title = title;
+    question.content = content;
+    question.tags = tagDocuments.map((tag) => tag._id);
+    await question.save();
+
+    return { success: true, message: "Question updated successfully" };
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+}

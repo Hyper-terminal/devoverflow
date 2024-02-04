@@ -2,6 +2,7 @@ import { formatAndDivideNumber, getTimeStamp } from "@/lib/utils";
 import Link from "next/link";
 import Metric from "../shared/Metric";
 import RenderTag from "../shared/RenderTag";
+import EditDeleteAction from "../shared/EditDeleteAction";
 
 interface QuestionCardProps {
   question: string;
@@ -20,9 +21,12 @@ const QuestionCard = ({ _id, question, tags, author, upvotes, views, answers, cr
     <>
       <div className="dark:dark-gradient flex w-full flex-col gap-4 rounded-xl border px-3 py-4 shadow-md dark:border-none">
         <div className="body-medium text-dark400_light700 block sm:hidden">{getTimeStamp(createdAt)}</div>
-        <Link href={`/question/${_id}`}>
-          <h1 className="h1-bold text-dark200_light800 line-clamp-1 cursor-pointer">{question}</h1>
-        </Link>
+        <div className="flex max-w-full flex-nowrap justify-between">
+          <Link className="w-11/12" href={`/question/${_id}`}>
+            <h1 className="h1-bold text-dark200_light800 line-clamp-1 cursor-pointer">{question}</h1>
+          </Link>
+          <EditDeleteAction type="Question" itemId={JSON.parse(JSON.stringify(_id))} />
+        </div>
         {tags?.map((tag) => <RenderTag key={tag._id} _id={tag._id} name={tag.name} />)}
 
         <div className="flex flex-wrap items-center justify-between">

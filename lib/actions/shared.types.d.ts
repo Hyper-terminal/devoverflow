@@ -75,6 +75,8 @@ export interface EditQuestionParams {
   title: string;
   content: string;
   path: string;
+  tags: string[];
+  authorID: string | number;
 }
 export interface GetAllTagsParams {
   page?: number;

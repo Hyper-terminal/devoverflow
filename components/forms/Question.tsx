@@ -1,7 +1,8 @@
 "use client";
 
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { createQuestion } from "@/lib/actions/question.action";
+import useTheme from "@/context/ThemeProvider";
+import { createQuestion, updateQuestion } from "@/lib/actions/question.action";
 import { QuestionSchema } from "@/lib/validation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Editor } from "@tinymce/tinymce-react";
@@ -13,11 +14,14 @@ import * as z from "zod";
 import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
-import useTheme from "@/context/ThemeProvider";
 
-const type: string = "create";
+type QuestionProps = {
+  mongoDBUserID: any;
+  type?: string;
+  questionDetails?: string;
+};
 
-const Question = ({ mongoDBUserID }: { mongoDBUserID: any }) => {
+const Question = ({ mongoDBUserID, type = "create", questionDetails }: QuestionProps) => {
   const editorRef = useRef();
   const router = useRouter();
   const pathname = usePathname();
@@ -25,12 +29,16 @@ const Question = ({ mongoDBUserID }: { mongoDBUserID: any }) => {
 
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const parsedQuestionDetails = questionDetails ? JSON.parse(questionDetails) : {};
+
+  const groupedTag = parsedQuestionDetails.tags ? parsedQuestionDetails.tags.map((tag: any) => tag.name) : [];
+
   const form = useForm<z.infer<typeof QuestionSchema>>({
     resolver: zodResolver(QuestionSchema),
     defaultValues: {
-      title: "",
-      explanation: "",
-      tags: [],
+      title: parsedQuestionDetails.title || "",
+      explanation: parsedQuestionDetails.content || "",
+      tags: groupedTag || [],
     },
   });
 
@@ -39,13 +47,18 @@ const Question = ({ mongoDBUserID }: { mongoDBUserID: any }) => {
     setIsSubmitting(true);
     try {
       // make an async call to our api
-      await createQuestion({
-        title: values.title,
-        content: values.explanation,
-        tags: values.tags,
-        author: JSON.parse(mongoDBUserID),
-        path: pathname,
-      });
+
+      if (type === "edit") {
+        // edit question
+      } else
+        await updateQuestion({
+          title: values.title,
+          content: values.explanation,
+          tags: values.tags,
+          authorID: JSON.parse(mongoDBUserID),
+          path: pathname,
+          questionId: parsedQuestionDetails._id,
+        });
 
       // navigate to home page
       router.push("/");
@@ -124,7 +137,7 @@ const Question = ({ mongoDBUserID }: { mongoDBUserID: any }) => {
                     // @ts-ignore
                     editorRef.current = editor;
                   }}
-                  initialValue=""
+                  initialValue={parsedQuestionDetails.content || ""}
                   init={{
                     height: 350,
                     menubar: true,

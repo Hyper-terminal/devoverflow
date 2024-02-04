@@ -7,6 +7,8 @@ import { revalidatePath } from "next/cache";
 import { connectToDb } from "../mongoose";
 import {
   CreateUserParams,
+  DeleteAnswerParams,
+  DeleteQuestionParams,
   DeleteUserParams,
   GetAllUsersParams,
   GetSavedQuestionsParams,
@@ -16,6 +18,7 @@ import {
 } from "./shared.types";
 import Answer from "@/database/answer.model";
 import Tag from "@/database/tag.model";
+import Interaction from "@/database/interaction.model";
 
 export async function getUserById(params: any) {
   try {
@@ -232,6 +235,74 @@ export async function getAllAnswersByUser(params: any) {
     const questions = await Answer.find({ author: user?._id }).sort({ createdAt: -1 });
 
     return questions;
+  } catch (error) {
+    console.log(error);
+    return null;
+  }
+}
+
+export async function deleteQuestion(params: DeleteQuestionParams) {
+  try {
+    const { questionId } = params;
+
+    await connectToDb();
+
+    const session = await mongoose.startSession();
+    session.startTransaction();
+
+    try {
+      const deletedQuestion = await Question.findByIdAndDelete(questionId, { session });
+
+      const deleteAnswerPromise = Answer.deleteMany({ question: questionId }, { session });
+      const updateTagPromise = Tag.updateMany({ questions: questionId }, { $pull: { questions: questionId } }, { session });
+      const deleteInteractionPromise = Interaction.deleteMany({ question: questionId }, { session });
+      const updateUserPromise = User.updateMany({ savedQuestions: questionId }, { $pull: { savedQuestions: questionId } }, { session });
+
+      await Promise.all([deleteAnswerPromise, updateTagPromise, deleteInteractionPromise, updateUserPromise]);
+
+      await session.commitTransaction();
+      session.endSession();
+
+      return deletedQuestion;
+    } catch (error) {
+      await session.abortTransaction();
+      session.endSession();
+      throw error;
+    }
+  } catch (error) {
+    console.log(error);
+    return null;
+  }
+}
+
+export async function deleteAnswer(params: DeleteAnswerParams) {
+  try {
+    const { answerId } = params;
+
+    await connectToDb();
+
+    const session = await mongoose.startSession();
+    session.startTransaction();
+
+    try {
+      const deletedAnswer = await Answer.findByIdAndDelete(answerId, { session });
+
+      const deleteInteractionPromise = Interaction.deleteMany({ answer: answerId }, { session });
+      const updateQuestionPromise = Question.updateMany({ answers: answerId }, { $pull: { answers: answerId } }, { session });
+      const updateUserPromise = User.updateMany({ savedAnswers: answerId }, { $pull: { savedAnswers: answerId } }, { session });
+      const TagUserPromise = Tag.updateMany({ answers: answerId }, { $pull: { answers: answerId } }, { session });
+
+      await Promise.all([deleteInteractionPromise, updateQuestionPromise, updateUserPromise, TagUserPromise]);
+
+      await session.commitTransaction();
+      session.endSession();
+
+      return deletedAnswer;
+    } catch (error) {
+      await session.abortTransaction();
+      session.endSession();
+      throw error;
+    }
   } catch (error) {
     console.log(error);
     return null;
