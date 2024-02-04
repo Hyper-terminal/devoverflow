@@ -32,6 +32,13 @@ export async function getAllTags(params: GetAllTagsParams) {
   try {
     connectToDb();
 
+    const { searchQuery } = params;
+
+    if (searchQuery) {
+      const tags = await Tag.find({ name: { $regex: searchQuery, $options: "i" } });
+      return tags;
+    }
+
     const tags = await Tag.find({});
 
     return tags;

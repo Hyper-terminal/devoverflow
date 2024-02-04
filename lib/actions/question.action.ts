@@ -12,10 +12,21 @@ import { formatResultFromDB } from "../utils";
 export async function getQuestions(params: GetQuestionsParams): Promise<{ questions: any }> {
   try {
     await connectToDb();
-    const questions = await Question.find({}).populate({ path: "tags", model: Tag }).populate({
-      path: "author",
-      model: User,
-    });
+    const { searchQuery } = params;
+
+    let query = {};
+
+    if (searchQuery) {
+      query = {
+        $or: [
+          { title: { $regex: new RegExp(searchQuery, "i") } },
+          { content: { $regex: new RegExp(searchQuery, "i") } },
+          { tags: { $elemMatch: { name: { $regex: new RegExp(searchQuery, "i") } } } },
+        ],
+      };
+    }
+
+    const questions = await Question.find(query).populate({ path: "tags", model: Tag }).populate({ path: "author", model: User });
 
     return { questions: formatResultFromDB(questions) };
   } catch (error) {

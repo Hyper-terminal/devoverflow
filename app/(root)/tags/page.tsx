@@ -5,14 +5,22 @@ import LocalSearchbar from "@/components/shared/search/LocalSearchbar";
 import { UserFilters } from "@/constants/filter";
 import { getAllTags } from "@/lib/actions/tag.action";
 
-const Tags = async () => {
-  const tags = await getAllTags({});
+const Tags = async ({ searchParams }: any) => {
+  const tags = await getAllTags({
+    searchQuery: searchParams.q as string,
+  });
   return (
     <>
       <h1 className="h1-bold text-dark200_light800">All Users</h1>
 
       <div className="mt-11 flex justify-between max-sm:flex-col sm:items-center">
-        <LocalSearchbar route="/community" iconPosition="left" imgSrc="/assets/icons/search.svg" placeholder="Search for Users..." otherClasses="flex-1 " />
+        <LocalSearchbar
+          route="/tags"
+          iconPosition="left"
+          imgSrc="/assets/icons/search.svg"
+          placeholder="Search for Users..."
+          otherClasses="flex-1 "
+        />
         <Filter otherClasses="min-h-[56px] sm:min-w-[170px]" placeholder="Select a Filter..." options={UserFilters} />
       </div>
 

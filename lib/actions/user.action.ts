@@ -97,6 +97,12 @@ export async function deleteUser(userData: DeleteUserParams) {
 export async function getAllUsers(params: GetAllUsersParams) {
   try {
     await connectToDb();
+    const { searchQuery } = params;
+
+    if (searchQuery) {
+      const users = await User.find({ name: { $regex: searchQuery, $options: "i" } });
+      return users;
+    }
 
     // const { page = 1, pageSize = 10, filter, searchQuery } = params;
 

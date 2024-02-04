@@ -1,25 +1,36 @@
+import QuestionCard from "@/components/card/QuestionCard";
+import NoResult from "@/components/shared/NoResult";
 import Filter from "@/components/shared/filter/Filter";
 import LocalSearchbar from "@/components/shared/search/LocalSearchbar";
 import { QuestionFilters } from "@/constants/filter";
-import { auth } from "@clerk/nextjs";
 import { getSavedQuestions } from "@/lib/actions/user.action";
-import QuestionCard from "@/components/card/QuestionCard";
-import NoResult from "@/components/shared/NoResult";
+import { auth } from "@clerk/nextjs";
 
-const Collection = async () => {
+const Collection = async ({ searchParams }: any) => {
   const { userId } = auth();
 
   if (!userId) return null;
 
-  const result = await getSavedQuestions({ clerkId: userId });
+  const result = await getSavedQuestions({ clerkId: userId, searchQuery: searchParams.q as string });
 
   return (
     <>
       <h1 className="h1-bold text-dark200_light800">All Questions</h1>
 
       <div className="mt-11 flex justify-between max-sm:flex-col sm:items-center">
-        <LocalSearchbar route="/" iconPosition="left" imgSrc="/assets/icons/search.svg" placeholder="Search for Question..." otherClasses="flex-1 " />
-        <Filter otherClasses="min-h-[56px] sm:min-w-[170px]" containerClasses="flex md:hidden" placeholder="Select a Filter..." options={QuestionFilters} />
+        <LocalSearchbar
+          route="/collection"
+          iconPosition="left"
+          imgSrc="/assets/icons/search.svg"
+          placeholder="Search for Question..."
+          otherClasses="flex-1 "
+        />
+        <Filter
+          otherClasses="min-h-[56px] sm:min-w-[170px]"
+          containerClasses="flex md:hidden"
+          placeholder="Select a Filter..."
+          options={QuestionFilters}
+        />
       </div>
 
       <div className="mt-10 flex flex-col gap-10">
