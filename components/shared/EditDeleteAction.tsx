@@ -1,7 +1,6 @@
 "use client";
 
 import { deleteAnswer, deleteQuestion } from "@/lib/actions/user.action";
-import { redirect } from "next/dist/server/api-utils";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 
@@ -15,6 +14,8 @@ const EditDeleteAction = ({ itemId, type }: EditDeleteActionProps) => {
 
   async function handleEdit() {
     if (type === "Answer") {
+      // edit answer
+      router.push(`/answer/edit/${itemId}`);
     } else {
       // edit question
       router.push(`/question/edit/${itemId}`);
