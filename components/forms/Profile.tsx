@@ -91,6 +91,7 @@ const Profile = ({ mongoUser }: ProfileProps) => {
       <form onSubmit={form.handleSubmit(onSubmit)} className="flex w-full flex-col gap-10 space-y-8">
         {formMetaData.map((item) => (
           <FormField
+            key={item.name}
             control={form.control}
             name={item.name as "fullname" | "username" | "website" | "location" | "bio"}
             render={({ field }) => (
