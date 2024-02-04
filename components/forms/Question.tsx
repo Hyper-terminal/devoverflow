@@ -46,22 +46,30 @@ const Question = ({ mongoDBUserID, type = "create", questionDetails }: QuestionP
   async function onSubmit(values: z.infer<typeof QuestionSchema>) {
     setIsSubmitting(true);
     try {
-      // make an async call to our api
-
       if (type === "edit") {
         // edit question
-      } else
         await updateQuestion({
           title: values.title,
           content: values.explanation,
           tags: values.tags,
-          authorID: JSON.parse(mongoDBUserID),
           path: pathname,
+          authorID: JSON.parse(mongoDBUserID),
           questionId: parsedQuestionDetails._id,
         });
 
-      // navigate to home page
-      router.push("/");
+        router.push(`/question/${parsedQuestionDetails._id}`);
+      } else {
+        await createQuestion({
+          title: values.title,
+          content: values.explanation,
+          tags: values.tags,
+          author: JSON.parse(mongoDBUserID),
+          path: pathname,
+        });
+
+        // navigate to home page
+        router.push("/");
+      }
     } catch (error) {
       console.log(error);
     } finally {
