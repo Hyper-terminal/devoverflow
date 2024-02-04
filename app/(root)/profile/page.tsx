@@ -2,10 +2,12 @@ import QuestionCard from "@/components/card/QuestionCard";
 import Metric from "@/components/shared/Metric";
 import StatsCard from "@/components/shared/StatsCard";
 import { getAllAnswersByUser, getAllQuestionByUser, getUserInfoById } from "@/lib/actions/user.action";
-import { auth } from "@clerk/nextjs";
+import { SignedIn, auth } from "@clerk/nextjs";
 import Image from "next/image";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { IAnswer } from "@/database/answer.model";
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
 
 const Page = async () => {
   const { userId } = auth();
@@ -29,6 +31,11 @@ const Page = async () => {
 
   return (
     <section>
+      <SignedIn>
+        <Link className="float-right" href={`/profile/edit`}>
+          <Button className="bg-gray-100">Edit Profile</Button>
+        </Link>
+      </SignedIn>
       <div className="flex items-center gap-4">
         <Image src={result.picture} alt="avatar" className="rounded-full object-contain p-1" width={100} height={100} />
         <div>
@@ -47,8 +54,8 @@ const Page = async () => {
             {result?.location ? <Metric title="" value={String(result?.location)} alt="location" icon="/assets/icons/location.svg" /> : ""}
             <Metric titlePosition="left" title="Joined" value={String(joinedAtFormatted)} alt="calendar" icon="/assets/icons/calendar.svg" />
           </div>
+          <p className="text-dark300_light700 my-4 text-sm">{result?.bio}</p>
         </div>
-        <p className="text-dark300_light700">{result?.bio}</p>
       </div>
 
       <div className="mt-11">

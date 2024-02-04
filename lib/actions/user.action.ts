@@ -308,3 +308,20 @@ export async function deleteAnswer(params: DeleteAnswerParams) {
     return null;
   }
 }
+
+export async function updateProfile(params: UpdateUserParams) {
+  try {
+    const { clerkId, updateData, path } = params;
+
+    await connectToDb();
+
+    const user = await User.findOneAndUpdate({ clerk: clerkId }, updateData, { new: true });
+
+    revalidatePath(path);
+
+    return user;
+  } catch (error) {
+    console.log(error);
+    return null;
+  }
+}
