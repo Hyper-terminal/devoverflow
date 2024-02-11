@@ -97,16 +97,33 @@ export async function deleteUser(userData: DeleteUserParams) {
 export async function getAllUsers(params: GetAllUsersParams) {
   try {
     await connectToDb();
-    const { searchQuery } = params;
+    const { searchQuery, filter } = params;
+
+    let filterOptions = {};
+
+    switch (filter) {
+      case "new_users":
+        filterOptions = { joinedAt: -1 };
+        break;
+
+      case "old_users":
+        filterOptions = { joinedAt: 1 };
+        break;
+
+      case "top_contributors":
+        filterOptions = { reputation: -1 };
+        break;
+
+      default:
+        break;
+    }
 
     if (searchQuery) {
-      const users = await User.find({ name: { $regex: searchQuery, $options: "i" } });
+      const users = await User.find({ name: { $regex: searchQuery, $options: "i" } }).sort(filterOptions);
       return users;
     }
 
-    // const { page = 1, pageSize = 10, filter, searchQuery } = params;
-
-    const users = await User.find({}).sort({ createdAt: -1 });
+    const users = await User.find({}).sort(filterOptions);
     return users;
   } catch (error) {
     console.log(error);

@@ -9,10 +9,10 @@ import { revalidatePath } from "next/cache";
 import { connectToDb } from "../mongoose";
 import { formatResultFromDB } from "../utils";
 
-export async function getQuestions(params: GetQuestionsParams): Promise<{ questions: any }> {
+export async function getQuestions(params: GetQuestionsParams): Promise<{ questions: any; isNext: boolean }> {
   try {
     await connectToDb();
-    const { searchQuery } = params;
+    const { searchQuery, filter, page = 1, pageSize = 20 } = params;
 
     let query = {};
 
@@ -26,12 +26,44 @@ export async function getQuestions(params: GetQuestionsParams): Promise<{ questi
       };
     }
 
-    const questions = await Question.find(query).populate({ path: "tags", model: Tag }).populate({ path: "author", model: User });
+    // questions to skip
+    const skip = (page - 1) * pageSize;
 
-    return { questions: formatResultFromDB(questions) };
+    let filterOptions = {};
+
+    switch (filter) {
+      case "newest":
+        filterOptions = { createdOn: -1 };
+
+        break;
+
+      case "frequent":
+        filterOptions = { views: -1 };
+        break;
+
+      case "unanswered":
+        filterOptions = { answers: { $size: 0 } };
+        break;
+
+      case "recommended":
+        filterOptions = { likes: -1 };
+        break;
+    }
+
+    const questions = await Question.find(query)
+      .populate({ path: "tags", model: Tag })
+      .populate({ path: "author", model: User })
+      .sort(filterOptions)
+      .skip(skip)
+      .limit(pageSize);
+
+    const totalQuestions = await Question.find(query).countDocuments();
+    const isNext = totalQuestions > questions.length + skip;
+
+    return { questions: formatResultFromDB(questions), isNext: isNext } as { questions: any; isNext: boolean };
   } catch (error) {
     console.log(error);
-    return { questions: null };
+    return { questions: null, isNext: false };
   }
 }
 

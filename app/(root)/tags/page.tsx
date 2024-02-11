@@ -8,6 +8,7 @@ import { getAllTags } from "@/lib/actions/tag.action";
 const Tags = async ({ searchParams }: any) => {
   const tags = await getAllTags({
     searchQuery: searchParams.q as string,
+    filter: searchParams.filters,
   });
   return (
     <>

@@ -4,13 +4,17 @@ import NoResult from "@/components/shared/NoResult";
 import Filter from "@/components/shared/filter/Filter";
 import LocalSearchbar from "@/components/shared/search/LocalSearchbar";
 import { Button } from "@/components/ui/button";
+import { Pagination, PaginationContent, PaginationItem, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
 import { HomePageFilters } from "@/constants/filter";
 import { getQuestions } from "@/lib/actions/question.action";
+
 import Link from "next/link";
 
 export default async function Home({ searchParams }: any) {
-  const { questions } = await getQuestions({
+  const { questions, isNext } = await getQuestions({
     searchQuery: searchParams.q as string,
+    filter: searchParams.filters,
+    page: searchParams.page ? Number(searchParams.page) : 1,
   });
 
   return (
@@ -59,6 +63,30 @@ export default async function Home({ searchParams }: any) {
           ))
         )}
       </div>
+
+      <Pagination className="my-8">
+        <PaginationContent>
+          <PaginationItem>
+            <PaginationPrevious
+              disabled={searchParams.page ? Number(searchParams.page) === 1 : true}
+              className=" background-light800_dark300 text-dark500_light700"
+              href={`?q=${searchParams.q || ""}&filters=${searchParams.filters || ""}&page=${searchParams.page ? Number(searchParams.page) - 1 : 1}`}
+            />
+          </PaginationItem>
+          <PaginationItem>
+            <p className="primary-gradient rounded-md text-sm my-0 text-dark200_light800 flex justify-center items-center px-4 py-3 !text-light-900">
+              {searchParams.page}
+            </p>
+          </PaginationItem>
+          <PaginationItem>
+            <PaginationNext
+              disabled={!isNext}
+              className=" background-light800_dark300 text-dark500_light700"
+              href={`?q=${searchParams.q || ""}&filters=${searchParams.filters || ""}&page=${searchParams.page ? Number(searchParams.page) + 1 : 1}`}
+            />
+          </PaginationItem>
+        </PaginationContent>
+      </Pagination>
     </>
   );
 }
