@@ -32,7 +32,7 @@ const GlobalSearch = ({ placeholder }: { placeholder?: string }) => {
       }
     }, 500);
     return () => clearTimeout(timer);
-  }, [search, router]);
+  }, [search, router, searchParams, pathname]);
 
   return (
     <>
