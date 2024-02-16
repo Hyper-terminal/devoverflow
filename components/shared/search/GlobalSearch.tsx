@@ -32,7 +32,8 @@ const GlobalSearch = ({ placeholder }: { placeholder?: string }) => {
       }
     }, 500);
     return () => clearTimeout(timer);
-  }, [search, router, searchParams, pathname]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [search, router]);
 
   return (
     <>
