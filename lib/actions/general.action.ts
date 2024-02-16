@@ -10,7 +10,7 @@ import { SearchParams } from "./shared.types";
 export const globalSearch = async (params: SearchParams) => {
   try {
     await connectToDb();
-    const allowedTypes = ["question", "answer", "user", "tag"];
+    // const allowedTypes = ["question", "answer", "user", "tag"];
 
     const { type, query } = params;
 
@@ -41,7 +41,7 @@ export const globalSearch = async (params: SearchParams) => {
       },
     ];
 
-    let results: any[] = [];
+    const results: any[] = [];
 
     if (type) {
       for (const { searchfield, model, fieldToReturn } of models) {
@@ -54,14 +54,13 @@ export const globalSearch = async (params: SearchParams) => {
             value: `$${fieldToReturn.split(" ")[1]}`,
           });
 
-        // const mappedResults = foundItems?.map((item) => ({
-        //   _id: item?.id || item?.clerkId,
-        //   title: item?.name || item?.title || item?.question,
-        // }));
-        // results.push(...mappedResults);
+        const mappedResults = foundItems?.map((item: any) => ({
+          _id: item?.id || item?.clerkId,
+          title: item?.name || item?.title || item?.question,
+        }));
+        results.push(...mappedResults);
         console.log(foundItems);
       }
-    } else {
     }
 
     return results;
