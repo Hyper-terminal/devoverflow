@@ -20,7 +20,7 @@ const GlobalSearch = ({ placeholder }: { placeholder?: string }) => {
       if (search) {
         // keep all queries other than q and globalQuery
         const newQuery = new URLSearchParams(searchParams.toString());
-        newQuery.append("globalQuery", search);
+        newQuery.set("globalQuery", search);
         newQuery.delete("q");
 
         router.push(`${pathname}?${newQuery.toString()}`);
@@ -42,7 +42,13 @@ const GlobalSearch = ({ placeholder }: { placeholder?: string }) => {
           onClickCapture={() => setIsOpen((prev) => !prev)}
           className="background-light800_darkgradient text-dark200_light800 relative flex min-h-[56px] grow items-center gap-1 rounded-xl px-4 "
         >
-          <Image src="/assets/icons/search.svg" alt="search" width={24} height={24} className="cursor-pointer" />
+          <Image
+            src="/assets/icons/search.svg"
+            alt="search"
+            width={24}
+            height={24}
+            className="cursor-pointer"
+          />
 
           <Input
             value={search}
@@ -50,7 +56,7 @@ const GlobalSearch = ({ placeholder }: { placeholder?: string }) => {
             type="text"
             placeholder={placeholder ?? "Search globally"}
             className={cn(
-              `paragraph-regular no-focus placeholder background-light800_darkgradient focus-visible:ring-0 focus-visible:outline-none border-none shadow-none outline-none ring-0 `,
+              `paragraph-regular no-focus placeholder background-light800_darkgradient focus-visible:ring-0 focus-visible:outline-none border-none shadow-none outline-none ring-0 `
             )}
           />
         </div>

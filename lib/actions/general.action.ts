@@ -6,11 +6,12 @@ import Tag from "@/database/tag.model";
 import User from "@/database/user.model";
 import { connectToDb } from "../mongoose";
 import { SearchParams } from "./shared.types";
+import { formatResultFromDB } from "../utils";
 
 export const globalSearch = async (params: SearchParams) => {
   try {
     await connectToDb();
-    // const allowedTypes = ["question", "answer", "user", "tag"];
+    const allowedTypes = ["question", "answer", "user", "tag"];
 
     const { type, query } = params;
 
@@ -43,27 +44,29 @@ export const globalSearch = async (params: SearchParams) => {
 
     const results: any[] = [];
 
-    if (type) {
+    if (!allowedTypes.includes(type as string)) {
       for (const { searchfield, model, fieldToReturn } of models) {
         const foundItems = await model
           .find({
             [searchfield]: { $regex: new RegExp(query as string, "i") },
           })
-          .select(fieldToReturn)
-          .projection({
-            value: `$${fieldToReturn.split(" ")[1]}`,
-          });
+          .select(fieldToReturn);
 
-        const mappedResults = foundItems?.map((item: any) => ({
-          _id: item?.id || item?.clerkId,
-          title: item?.name || item?.title || item?.question,
-        }));
-        results.push(...mappedResults);
-        console.log(foundItems);
+        results.push(...foundItems);
       }
-    }
+    } else if (allowedTypes.includes(type as string)) {
+      const foundModel = models?.find((item) => item?.type === type);
 
-    return results;
+      const foundItems = await foundModel?.model
+        ?.find({
+          [foundModel.searchfield]: {
+            $regex: new RegExp(query as string, "i"),
+          },
+        })
+        .select(foundModel.fieldToReturn);
+      results.push(...foundItems!);
+    } else throw new Error();
+    return formatResultFromDB(results);
   } catch (error) {
     console.log(error);
     return null;

@@ -6,9 +6,12 @@
     "source.addMissingImports": "explicit"
   },
   "[typescriptreact]": {
-    "editor.defaultFormatter": "esbenp.prettier-vscode"
+    "editor.defaultFormatter": "vscode.typescript-language-features"
   },
   "[css]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
-  }
+  },
+  "editor.tabCompletion": "on",
+  "diffEditor.codeLens": true,
+  "MutableAI.upsell": false
 }
