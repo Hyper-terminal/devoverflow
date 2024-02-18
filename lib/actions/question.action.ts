@@ -4,12 +4,20 @@ import Answer from "@/database/answer.model";
 import Question, { IQuestion } from "@/database/question.model";
 import Tag, { ITag } from "@/database/tag.model";
 import User from "@/database/user.model";
-import { CreateQuestionParams, EditQuestionParams, GetQuestionByIdParams, GetQuestionsParams, QuestionVoteParams } from "@/lib/actions/shared.types";
+import {
+  CreateQuestionParams,
+  EditQuestionParams,
+  GetQuestionByIdParams,
+  GetQuestionsParams,
+  QuestionVoteParams,
+} from "@/lib/actions/shared.types";
 import { revalidatePath } from "next/cache";
 import { connectToDb } from "../mongoose";
 import { formatResultFromDB } from "../utils";
 
-export async function getQuestions(params: GetQuestionsParams): Promise<{ questions: any; isNext: boolean }> {
+export async function getQuestions(
+  params: GetQuestionsParams
+): Promise<{ questions: any; isNext: boolean }> {
   try {
     await connectToDb();
     const { searchQuery, filter, page = 1, pageSize = 20 } = params;
@@ -21,7 +29,11 @@ export async function getQuestions(params: GetQuestionsParams): Promise<{ questi
         $or: [
           { title: { $regex: new RegExp(searchQuery, "i") } },
           { content: { $regex: new RegExp(searchQuery, "i") } },
-          { tags: { $elemMatch: { name: { $regex: new RegExp(searchQuery, "i") } } } },
+          {
+            tags: {
+              $elemMatch: { name: { $regex: new RegExp(searchQuery, "i") } },
+            },
+          },
         ],
       };
     }
@@ -60,7 +72,10 @@ export async function getQuestions(params: GetQuestionsParams): Promise<{ questi
     const totalQuestions = await Question.find(query).countDocuments();
     const isNext = totalQuestions > questions.length + skip;
 
-    return { questions: formatResultFromDB(questions), isNext: isNext } as { questions: any; isNext: boolean };
+    return { questions: formatResultFromDB(questions), isNext: isNext } as {
+      questions: any;
+      isNext: boolean;
+    };
   } catch (error) {
     console.log(error);
     return { questions: null, isNext: false };
@@ -70,7 +85,13 @@ export async function getQuestions(params: GetQuestionsParams): Promise<{ questi
 export async function createQuestion(params: CreateQuestionParams) {
   try {
     // Validate input parameters
-    if (!params || !params.title || !params.content || !params.tags || !params.author) {
+    if (
+      !params ||
+      !params.title ||
+      !params.content ||
+      !params.tags ||
+      !params.author
+    ) {
       throw new Error("Invalid input parameters");
     }
 
@@ -107,6 +128,11 @@ export async function createQuestion(params: CreateQuestionParams) {
     // Update question with tags and save
     question.tags = tagDocuments.map((tag) => tag._id);
     await question.save();
+
+    // increase the reputation of the author of the question
+    const author = await User.findById(params.author);
+    author.reputation += 5;
+    await author.save();
 
     // need to revalidate the path
     revalidatePath(params.path);
@@ -166,7 +192,9 @@ export async function getQuestionById(params: GetQuestionByIdParams) {
  * @throws {Error} - If the question is not found or an error occurs during the upvote process.
  */
 
-export async function upvoteQuestion(QuestionVote: QuestionVoteParams): Promise<void> {
+export async function upvoteQuestion(
+  QuestionVote: QuestionVoteParams
+): Promise<void> {
   try {
     await connectToDb();
 
@@ -192,6 +220,21 @@ export async function upvoteQuestion(QuestionVote: QuestionVoteParams): Promise<
     if (!question) {
       throw new Error("Question not found");
     }
+
+    // handle reputation of the author of the question and the user who upvoted the question
+    const author = await User.findById(question.author);
+    const user = await User.findById(userId as string);
+
+    if (hasupVoted) {
+      author.reputation -= 5;
+      user.reputation -= 5;
+    } else {
+      author.reputation += 5;
+      user.reputation += 5;
+    }
+
+    await author.save();
+    await user.save();
 
     revalidatePath(path);
   } catch (error) {
@@ -233,6 +276,21 @@ export async function downvoteQuestion(QuestionVote: QuestionVoteParams) {
     if (!question) {
       throw new Error("Question not found");
     }
+
+    // handle reputation of the author of the question and the user who downvoted the question
+    const author = await User.findById(question.author);
+    const user = await User.findById(userId as string);
+
+    if (hasdownVoted) {
+      author.reputation += 2;
+      user.reputation += 2;
+    } else {
+      author.reputation -= 2;
+      user.reputation -= 2;
+    }
+
+    await author.save();
+    await user.save();
 
     revalidatePath(path);
   } catch (error) {
@@ -292,7 +350,9 @@ export async function getHotQuestions() {
   try {
     await connectToDb();
 
-    const questions = await Question.find({}).sort({ likes: -1, views: -1 }).limit(10);
+    const questions = await Question.find({})
+      .sort({ likes: -1, views: -1 })
+      .limit(10);
 
     return questions;
   } catch (error) {
