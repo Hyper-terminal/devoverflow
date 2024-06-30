@@ -14,6 +14,7 @@ import {
 import { revalidatePath } from "next/cache";
 import { connectToDb } from "../mongoose";
 import { formatResultFromDB } from "../utils";
+import { ObjectId } from "mongoose";
 
 export async function getQuestions(
   params: GetQuestionsParams
@@ -72,7 +73,7 @@ export async function getQuestions(
     const totalQuestions = await Question.find(query).countDocuments();
     const isNext = totalQuestions > questions.length + skip;
 
-    return { questions: formatResultFromDB(questions), isNext: isNext } as {
+    return { questions: formatResultFromDB(questions), isNext } as {
       questions: any;
       isNext: boolean;
     };
@@ -124,9 +125,8 @@ export async function createQuestion(params: CreateQuestionParams) {
       );
       tagDocuments.push(existingTag);
     }
-
     // Update question with tags and save
-    question.tags = tagDocuments.map((tag) => tag._id);
+    question.tags = tagDocuments.map((tag) => tag._id as ObjectId);
     await question.save();
 
     // increase the reputation of the author of the question

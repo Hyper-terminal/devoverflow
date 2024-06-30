@@ -11,6 +11,7 @@ export interface IQuestion extends Document {
   tags: Schema.Types.ObjectId[];
   author: Schema.Types.ObjectId;
   createdAt: Date;
+  _id?: any
 }
 
 const QuestionSchema = new Schema<IQuestion>({
