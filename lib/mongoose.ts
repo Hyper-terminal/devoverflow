@@ -17,7 +17,7 @@ export async function connectToDb() {
 
   try {
     await mongoose.connect(process.env.MONGODB_URI, {
-      dbName: "DevOverflow",
+      dbName: process.env.DB_Name,
     });
 
     console.log("=> database connection successful");
